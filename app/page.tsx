@@ -16,7 +16,7 @@ export default function Home() {
       <Nav />
       <HeroSequence />
 
-      <Section id="wind" numeral="I" dark>
+      <Section id="wind" numeral="I" dark image="/plates/wind.jpg">
         <Wind />
       </Section>
 
@@ -24,7 +24,7 @@ export default function Home() {
         <Escapement />
       </Section>
 
-      <Section id="gears" numeral="III" dark>
+      <Section id="gears" numeral="III" dark image="/plates/gears.jpg">
         <Gears />
       </Section>
 
@@ -32,7 +32,7 @@ export default function Home() {
         <Press />
       </Section>
 
-      <Section id="tape" numeral="V" dark>
+      <Section id="tape" numeral="V" dark image="/plates/tape.jpg">
         <Tape />
       </Section>
 

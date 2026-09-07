@@ -8,18 +8,17 @@ const items = [
 ];
 
 /**
- * The section index, in the position Nostalgique keeps its left-hand
- * contents column. Deliberately hardcoded to paper colours rather than
- * the semantic --fg/--bg tokens: on large screens it's fixed for the
- * whole scroll, so it must stay legible while the sections passing
- * beside it flip between paper and plate. The spine of the page stays
- * one colour; the pages beside it are what turn dark and light.
+ * The section index, a plain masthead-strip header across the top of
+ * the page. Deliberately hardcoded to paper colours rather than the
+ * semantic --fg/--bg tokens: it sits above every section, including
+ * the dark plate ones, and must stay legible regardless of what's
+ * scrolling past beneath it — the strip itself never changes colour.
  */
 export function Nav() {
   return (
     <nav
       aria-label="Sections"
-      className="font-mono flex flex-wrap gap-x-6 gap-y-2 border-b border-[#1c1815]/15 bg-[#efe9dc] px-6 py-4 text-[0.8125rem] tracking-wide text-[#1c1815] sm:px-10 lg:fixed lg:inset-y-0 lg:left-0 lg:w-32 lg:flex-col lg:justify-center lg:gap-4 lg:border-b-0 lg:border-r lg:px-8 lg:py-0"
+      className="font-mono flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-b border-[#1c1815]/15 bg-[#efe9dc] px-6 py-4 text-[0.8125rem] tracking-wide text-[#1c1815] sm:px-10"
     >
       {items.map((item) => (
         <a

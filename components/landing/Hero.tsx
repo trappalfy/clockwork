@@ -1,6 +1,6 @@
 import { HeroMasthead } from "./HeroMasthead";
 import { HeroFacts } from "./HeroFacts";
-import { EscapementSketch } from "./EscapementSketch";
+import { Mark } from "@/components/ui/Mark";
 
 /**
  * The plain path: no WebGL, no scroll-jacking. Used directly when
@@ -10,10 +10,10 @@ import { EscapementSketch } from "./EscapementSketch";
  */
 export function Hero() {
   return (
-    <header className="mx-auto w-full max-w-5xl px-6 pt-16 sm:px-10 lg:pl-40">
+    <header className="mx-auto w-full max-w-5xl px-6 pt-16 sm:px-10">
       <HeroMasthead />
       <HeroFacts />
-      <EscapementSketch className="mx-auto my-16 w-full max-w-md text-[var(--ink-soft)]" />
+      <Mark className="mx-auto my-16 w-40 text-[var(--ink-soft)]" />
     </header>
   );
 }

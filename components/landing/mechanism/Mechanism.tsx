@@ -3,7 +3,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { buildAnchorGeometry, buildGearGeometry } from "./gear";
+import { buildGearGeometry } from "./gear";
 
 const BRASS = "#B08243";
 const BRASS_LIGHT = "#D8B478";
@@ -20,6 +20,7 @@ const GEAR_SPECS: GearSpec[] = [
   { position: [-1.6, 0.2, 0], scale: 1.1, speed: 0.5 },
   { position: [0, 0, 0], scale: 0.75, speed: -0.85, light: true },
   { position: [1.05, 0.35, 0.12], scale: 0.55, speed: 1.3 },
+  { position: [1.7, 0.55, 0.22], scale: 0.5, speed: -1.6 },
   { position: [0.5, -0.6, -0.15], scale: 0.4, speed: -1.9, light: true },
 ];
 
@@ -48,21 +49,15 @@ export function Mechanism({
       }),
     [],
   );
-  const anchorGeo = useMemo(() => buildAnchorGeometry(0.12), []);
 
   const gearMeshRefs = useRef<(THREE.Mesh | null)[]>([]);
-  const anchorRef = useRef<THREE.Mesh>(null);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     const speedMul = THREE.MathUtils.clamp(progressRef.current, 0, 1);
     gearMeshRefs.current.forEach((mesh, i) => {
       if (!mesh) return;
       mesh.rotation.z += delta * GEAR_SPECS[i].speed * (0.12 + speedMul * 0.9);
     });
-    if (anchorRef.current) {
-      const t = state.clock.elapsedTime * (2 + speedMul * 6);
-      anchorRef.current.rotation.z = Math.sin(t) * 0.22 * (0.2 + speedMul);
-    }
   });
 
   return (
@@ -84,24 +79,6 @@ export function Mechanism({
           />
         </mesh>
       ))}
-
-      <mesh ref={anchorRef} geometry={anchorGeo} position={[1.6, 0.5, 0.25]}>
-        <meshStandardMaterial color={BRASS_LIGHT} metalness={1} roughness={0.3} />
-      </mesh>
-
-      {/* The mainspring barrel — where "wind it" happens. */}
-      <group position={[-1.6, 0.2, 0.32]}>
-        <mesh>
-          <cylinderGeometry args={[0.42, 0.42, 0.22, 24]} />
-          <meshStandardMaterial color={BRASS} metalness={1} roughness={0.4} />
-        </mesh>
-        {[0.1, 0, -0.1].map((y, idx) => (
-          <mesh key={idx} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.3 - idx * 0.04, 0.012, 8, 32]} />
-            <meshStandardMaterial color={BRASS_LIGHT} metalness={1} roughness={0.25} />
-          </mesh>
-        ))}
-      </group>
 
       <hemisphereLight args={["#3a3226", "#0a0806", 0.6]} />
       <directionalLight position={[3, 4, 5]} intensity={2.6} color="#ffe4b8" />

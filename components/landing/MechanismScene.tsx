@@ -1,11 +1,16 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useScrollProgress } from "./useScrollProgress";
 import { HeroMasthead } from "./HeroMasthead";
 import { HeroFacts } from "./HeroFacts";
-import { EscapementSketch } from "./EscapementSketch";
+import { Mark } from "@/components/ui/Mark";
+
+// How long the mechanism runs alone, title-less, before the wordmark
+// is allowed to appear. Matches HeroMasthead's own transition length.
+const INTRO_DELAY_MS = 1800;
+const INTRO_FADE_MS = 900;
 
 // three/@react-three never touch the server, and never touch /app —
 // see the eslint zone rule and FRONTEND.md's bundle-isolation note.
@@ -22,9 +27,13 @@ export function MechanismScene() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mastheadRef = useRef<HTMLDivElement>(null);
   const engravingRef = useRef<HTMLDivElement>(null);
+  // Gates the scroll-driven fade below: false until the one-time entrance
+  // finishes, so an eager scroll during the intro can't snap the title
+  // to full opacity before it's had its moment alone with the machine.
+  const introDoneRef = useRef(false);
 
   const progressRef = useScrollProgress(wrapperRef, (progress) => {
-    if (mastheadRef.current) {
+    if (mastheadRef.current && introDoneRef.current) {
       // Visible at rest, gone by a third of the way into the wind beat.
       mastheadRef.current.style.opacity = String(
         1 - Math.min(progress / 0.3, 1),
@@ -41,6 +50,23 @@ export function MechanismScene() {
     }
   });
 
+  // The title's one-time entrance: hidden through the opening beat, then
+  // fades in on a flat timer, independent of scroll. Once it fires,
+  // introDoneRef hands control to the scroll-driven fade above — computed
+  // from the live progress rather than assumed to be 0, in case the
+  // visitor has already started scrolling during the delay.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      introDoneRef.current = true;
+      if (mastheadRef.current) {
+        const opacity = 1 - Math.min(progressRef.current / 0.3, 1);
+        mastheadRef.current.style.transition = `opacity ${INTRO_FADE_MS}ms ease`;
+        mastheadRef.current.style.opacity = String(opacity);
+      }
+    }, INTRO_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [progressRef]);
+
   return (
     <>
       <div ref={wrapperRef} className="relative" style={{ height: "320vh" }}>
@@ -49,7 +75,8 @@ export function MechanismScene() {
 
           <div
             ref={mastheadRef}
-            className="pointer-events-none absolute inset-x-0 top-16 mx-auto w-full max-w-5xl px-6 sm:px-10 lg:pl-40"
+            className="pointer-events-none absolute inset-x-0 top-16 mx-auto w-full max-w-5xl px-6 sm:px-10"
+            style={{ opacity: 0 }}
           >
             <HeroMasthead />
           </div>
@@ -59,12 +86,12 @@ export function MechanismScene() {
             className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--paper)]"
             style={{ opacity: 0 }}
           >
-            <EscapementSketch className="w-full max-w-md text-[var(--ink-soft)]" />
+            <Mark className="w-40 text-[var(--ink-soft)]" />
           </div>
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-5xl px-6 sm:px-10 lg:pl-40">
+      <div className="mx-auto w-full max-w-5xl px-6 sm:px-10">
         <HeroFacts />
       </div>
     </>

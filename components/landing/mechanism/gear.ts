@@ -53,36 +53,3 @@ export function buildGearGeometry({
   geometry.center();
   return geometry;
 }
-
-/**
- * The escapement anchor: a compact rocking crescent with two pallets,
- * not a gear — it ticks side to side, it doesn't turn. Kept small and
- * roughly circular in extent so it reads as one part at a glance,
- * rather than a long sliver crossing the frame.
- */
-export function buildAnchorGeometry(depth: number) {
-  const shape = new THREE.Shape();
-  shape.moveTo(0, 0.42);
-  shape.quadraticCurveTo(0.5, 0.34, 0.62, -0.1);
-  shape.quadraticCurveTo(0.66, -0.24, 0.5, -0.3);
-  shape.quadraticCurveTo(0.34, -0.1, 0, 0.14);
-  shape.quadraticCurveTo(-0.34, -0.1, -0.5, -0.3);
-  shape.quadraticCurveTo(-0.66, -0.24, -0.62, -0.1);
-  shape.quadraticCurveTo(-0.5, 0.34, 0, 0.42);
-  shape.closePath();
-
-  const bore = new THREE.Path();
-  bore.absarc(0, 0.12, 0.07, 0, Math.PI * 2, true);
-  shape.holes.push(bore);
-
-  const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth,
-    bevelEnabled: true,
-    bevelThickness: depth * 0.2,
-    bevelSize: depth * 0.08,
-    bevelSegments: 1,
-    curveSegments: 16,
-  });
-  geometry.center();
-  return geometry;
-}

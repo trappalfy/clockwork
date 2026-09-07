@@ -19,9 +19,9 @@ export interface Keyframe {
 export const KEYFRAMES: Keyframe[] = [
   // 0 — Rest. Wide, static, the whole assembly readable at once.
   { position: [0, 0.3, 9], lookAt: [0, 0, 0], fov: 32, drive: 0 },
-  // 1 — Wind. Push toward the barrel (screen-left), train starts turning.
+  // 1 — Wind. Push toward the largest gear (screen-left), train starts turning.
   { position: [-2.4, 0.6, 5], lookAt: [-1.6, 0.2, 0], fov: 28, drive: 0.5 },
-  // 2 — Escapement. In close on the anchor, full speed, ticking.
+  // 2 — Escapement. In close on the train's far end, full speed.
   { position: [2.2, 0.9, 3.4], lookAt: [1.6, 0.5, 0], fov: 24, drive: 1 },
 ];
 
