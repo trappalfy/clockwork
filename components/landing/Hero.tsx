@@ -13,7 +13,7 @@ export function Hero() {
     <header className="mx-auto w-full max-w-5xl px-6 pt-16 sm:px-10">
       <HeroMasthead />
       <HeroFacts />
-      <Mark className="mx-auto my-16 w-40 text-[var(--ink-soft)]" />
+      <Mark className="mx-auto my-16 w-40" />
     </header>
   );
 }

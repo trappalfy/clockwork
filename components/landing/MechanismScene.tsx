@@ -86,7 +86,7 @@ export function MechanismScene() {
             className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--paper)]"
             style={{ opacity: 0 }}
           >
-            <Mark className="w-40 text-[var(--ink-soft)]" />
+            <Mark className="w-40" />
           </div>
         </div>
       </div>
