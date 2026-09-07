@@ -1,0 +1,65 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Font family utilities (font-display / font-text / font-mono) alias the
+   raw variables next/font sets on <html> — see app/layout.tsx. Colour is
+   intentionally NOT registered here: components read tokens.css directly
+   via arbitrary-value utilities like bg-[var(--bg)], so the semantic
+   layer has exactly one definition. */
+@theme inline {
+  --font-display: var(--font-bodoni-moda);
+  --font-text: var(--font-libre-caslon);
+  --font-mono: var(--font-courier-prime);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  /* var(--font-text) (Tailwind theme alias) only resolves inside
+     generated utility classes, not in hand-written CSS — reference the
+     next/font variable directly here instead. */
+  font: 400 var(--text-body) / 1.7 var(--font-libre-caslon);
+  position: relative;
+}
+
+/* Paper grain: one fixed noise field over the whole page, not a
+   per-section asset. multiply keeps it from lightening the plate. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: var(--paper-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

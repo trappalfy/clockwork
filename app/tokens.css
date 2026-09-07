@@ -1,0 +1,96 @@
+/* ============================================================
+   Clockwork — design tokens
+   Raw palette, semantic roles, type scale, and the plate (engraving)
+   inversion. Components read only the semantic layer, never the raw
+   palette directly — that's what keeps light paper and dark plate
+   interchangeable without a component ever branching on which one
+   it's in.
+   ============================================================ */
+
+:root {
+  /* Raw palette — each value names a material, not a mood. */
+  --paper: #efe9dc;        /* newsprint ground */
+  --paper-deep: #e4dcc9;   /* second sheet underneath; cast shadow on paper */
+  --ink: #1c1815;          /* printer's black — never pure #000 */
+  --ink-soft: #4a423a;     /* ink thinned for secondary text and rules */
+  --plate: #14110e;        /* the engraving plate's ground */
+  --plate-deep: #201b16;   /* recessed surface on the plate */
+  --brass: #b08243;        /* the one metal — rules, large type, icon fills */
+  --brass-ink: #8a5a22;    /* brass darkened for body-sized text */
+  --brass-light: #d8b478;  /* brass under lamplight — for use on --plate */
+  --verdigris: #3e6b62;    /* oxidised brass — gain */
+  --oxblood: #8e2c24;      /* corrector's red — loss, warning */
+  --oxblood-light: #c24a3f; /* oxblood lightened for legibility on --plate */
+
+  /* Semantic roles — the only tokens components should reference. */
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --muted: var(--ink-soft);
+  --surface: var(--paper-deep);
+  --rule: var(--ink-soft);
+  --accent: var(--brass);
+  --accent-text: var(--brass-ink);
+  --positive: var(--verdigris);
+  --negative: var(--oxblood);
+  --warning: var(--oxblood);
+  --focus-ring: var(--ink);
+
+  /* Type scale — editorial jumps between sizes, not a smooth ramp.
+     Fonts are set by next/font on <html> as --font-display / --font-text
+     / --font-mono; see app/layout.tsx. */
+  --text-display-1: clamp(2.75rem, 2rem + 3.2vw, 5.25rem);
+  --text-display-2: clamp(1.75rem, 1.25rem + 1.6vw, 2.75rem);
+  --text-heading: 1.5rem;
+  --text-body: 1.125rem;
+  --text-body-sm: 1rem;
+  --text-caption: 0.9375rem;
+  --text-mono: 0.9375rem;
+
+  /* Paper grain — fixed SVG noise, no raster asset. Applied once via
+     body::before in globals.css. */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Contrast, measured against WCAG 2.1 relative luminance (not assumed):
+ *   --ink         on --paper  → 14.6:1  (body text)
+ *   --brass-ink   on --paper  →  4.6:1  (accent text, body size)
+ *   --verdigris   on --paper  →  5.0:1  (positive indicator text)
+ *   --oxblood     on --paper  →  6.8:1  (negative / warning text)
+ *   --paper       on --plate  → 15.6:1  (inverted body text)
+ *   --brass-light on --plate  →  9.6:1  (accent text on plate)
+ *   --ink-soft    on --paper  →  8.1:1  (muted/caption text)
+ *   --paper-deep  on --plate  → 13.8:1  (muted/caption text on plate)
+ *
+ * Raw --brass on --paper measures 2.8:1 — below the 3:1 floor even for
+ * large text or UI-component outlines. It is reserved for rules, fills,
+ * and display type set ≥28px, and it is never used for a focus ring;
+ * focus uses --focus-ring (--ink on paper, --brass-light on plate).
+ */
+
+/* The plate: a dark inversion of the same surface, not a second theme.
+   Any component that only reads semantic tokens looks correct inside
+   .plate with no changes of its own. */
+.plate {
+  --bg: var(--plate);
+  --fg: var(--paper);
+  --muted: var(--paper-deep);
+  --surface: var(--plate-deep);
+  --rule: var(--brass);
+  --accent: var(--brass-light);
+  --accent-text: var(--brass-light);
+  --negative: var(--oxblood-light);
+  --focus-ring: var(--brass-light);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Numerals: tabular wherever a figure must hold its column (prices,
+   quotes, ticker); oldstyle wherever a number sits inside running
+   editorial text. Never left to the font's default. */
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.oldstyle {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
