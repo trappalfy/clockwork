@@ -53,10 +53,28 @@ export async function fetchStockAssets(): Promise<StockAsset[]> {
   }
 }
 
+/**
+ * A 429 here is usually gone within a moment, but the caller has no cache to fall back to on a
+ * cold start -- every serverless instance boots with its own empty `cache`, so the very first
+ * request an instance ever serves has nothing to fall back to and would otherwise 502 on exactly
+ * the traffic burst most likely to trigger the rate limit in the first place.
+ */
+async function fetchWithRetry(url: string): Promise<Response> {
+  let last: Response | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * attempt));
+    const res = await fetch(url, { headers: { accept: 'application/json' } });
+    if (res.ok) return res;
+    if (res.status !== 429) return res; // a non-rate-limit error won't fix itself by waiting
+    last = res;
+  }
+  return last!;
+}
+
 async function refreshStockAssets(): Promise<StockAsset[]> {
   const [assetsRes, pricesRes] = await Promise.all([
-    fetch(`${RHJ_BASE}/assets`, { headers: { accept: 'application/json' } }),
-    fetch(`${RHJ_BASE}/prices`, { headers: { accept: 'application/json' } }),
+    fetchWithRetry(`${RHJ_BASE}/assets`),
+    fetchWithRetry(`${RHJ_BASE}/prices`),
   ]);
   if (!assetsRes.ok) throw new Error(`rhj/assets returned ${assetsRes.status}`);
   if (!pricesRes.ok) throw new Error(`rhj/prices returned ${pricesRes.status}`);
