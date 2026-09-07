@@ -14,6 +14,7 @@ import { AssetSelect } from "./AssetSelect";
 import { NetworkBanner } from "./NetworkBanner";
 import { ApprovalSteps } from "./ApprovalSteps";
 import { StatusMessage } from "./StatusMessage";
+import { walletErrorCopy } from "./walletErrorCopy";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as Address;
 
@@ -134,10 +135,11 @@ export function SwapCard() {
         </button>
         {wallet.error ? (
           <p
-            className="font-text mt-4 text-[var(--negative)]"
+            className="font-text mx-auto mt-4 max-w-[52ch] text-[var(--negative)]"
             style={{ fontSize: "var(--text-caption)" }}
+            role="alert"
           >
-            {wallet.error}
+            {walletErrorCopy(wallet.error)}
           </p>
         ) : null}
       </div>
