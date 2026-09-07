@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clockwork
 
-## Getting Started
+Trade tokenized equities on Robinhood Chain (chain id `4663`). Connect a wallet, swap
+ETH for a tokenized stock or back — NVDA, AAPL, SPY, and roughly ninety others — routed
+through public Uniswap V3/V4 pools and settled straight to your own wallet. No account,
+no custody: the server only ever hands back a transaction for your wallet to sign.
 
-First, run the development server:
+Live at **[clockwork-nu-kohl.vercel.app](https://clockwork-nu-kohl.vercel.app)**.
+
+## Layout
+
+Two halves of one Next.js app, deliberately isolated from each other:
+
+- **Landing** (`app/page.tsx`, `components/landing/**`) — the pitch, plus a pinned
+  react-three-fiber scene over the first three sections. No wallet connector in its
+  bundle; see `FRONTEND.md` for why and how that's enforced.
+- **Trade screen** (`app/app/**`, `components/trade/**`) — the actual swap form, built
+  on the hooks below. No third-party scripts of any kind: this is where transactions
+  get signed.
+- **Chain layer** (`lib/**`, `hooks/**`, `app/api/**`) — pool discovery, quoting, and
+  Universal Router calldata encoding. The router on this chain is a *fork* with extra
+  struct fields; see the ABI comments in `lib/router/encode.ts` before touching it.
+
+`FRONTEND.md` is the living brief for whoever's working on the landing/trade split —
+read it before starting frontend work, it tracks what's done and what each zone owns.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). No environment variables are
+needed — chain RPC, contract addresses, and Robinhood's public asset/price API are all
+hardcoded constants in `lib/chain/addresses.ts` and `lib/registry/assets.ts`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test        # unit: calldata encoding, slippage math, pool-key derivation. No network.
+npm run test:live   # + integration: real quotes and eth_call/eth_simulateV1 simulations
+                     # against live chain state. Slower, can be flaky under RPC rate limits
+                     # that are nobody's bug — see the retry logic in lib/pools/discovery.ts
+                     # and lib/registry/assets.ts. Never signs or sends a real transaction.
+```
 
-## Learn More
+`npm test` is what should run before every change to `lib/**`. The unit suite in
+particular guards the fork-specific ABI layouts in `lib/router/encode.ts` — the ones
+Uniswap's canonical struct definitions get wrong on this chain — so a "cleanup" that
+quietly reverts them back to the stock layout fails loudly instead of shipping a swap
+that reverts on-chain.
 
-To learn more about Next.js, take a look at the following resources:
+`scripts/*.ts` are one-off diagnostic probes used during development (`npx tsx
+scripts/<name>.ts`), not a regression suite — that's what `tests/` is for.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploying
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+vercel login   # once, per machine
+vercel --prod
+```
 
-## Deploy on Vercel
+No env vars to configure. The project is already linked to
+[github.com/trappalfy/clockwork](https://github.com/trappalfy/clockwork); a push to
+`main` redeploys automatically via Vercel's GitHub integration.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## What's not done yet
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Recorded here rather than left implicit — see git history and `FRONTEND.md` for
+detail as this changes:
+
+- No security review has run against this codebase.
+- Branding is minimal (a brand mark exists; no wider identity/social assets).
+- 8 of 194 registry-listed assets have a deployed pool with zero on-chain liquidity
+  (confirmed by hand, not a bug) — they fail a quote with a clear message rather than
+  routing.
